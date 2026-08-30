@@ -1,0 +1,10 @@
+services:
+  alertmanager:
+    volumes:
+      - ./examples/alertmanager.webhook.yml:/etc/alertmanager/alertmanager.yml:ro
+    secrets:
+      - alertmanager_webhook_url
+
+secrets:
+  alertmanager_webhook_url:
+    file: ${ALERTMANAGER_WEBHOOK_URL_FILE:-./deploy/secrets/alertmanager_webhook_url}

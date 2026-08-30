@@ -1,0 +1,35 @@
+---
+servers:
+  - name: informix-production
+    informixserver: informix-production
+
+# Remove "tables" while table-limit monitoring is not required. Omitting this
+# whole section keeps every collector enabled for backward compatibility.
+collectors:
+  - profile
+  - activity
+  - dbspaces
+  - tables
+  - custom
+
+# /metrics/storage caches these collectors and queries Informix every two hours.
+# Chunk I/O remains in the fast group even though capacity belongs to dbspaces.
+slow_collectors:
+  - dbspaces
+  - tables
+
+# Each custom query must return exactly one row and one numeric column.
+# Metrics are exported as informix_custom_<name>{informixserver="..."}.
+custom: []
+# custom:
+#   - name: example_session_count
+#     help: Number of sessions returned by an example custom query.
+#     value_type: gauge
+#     query: select count(*) from syssessions
+
+# Only tables approaching operational limits are exported to control cardinality.
+# Set either minimum to -1 to include every table/partition.
+table_limits:
+  minimum_extents: 100
+  minimum_partition_pages: 8000000
+  classic_partition_page_limit: 16777215

@@ -1,0 +1,2 @@
+# dbservername  nettype   hostname              servicename
+ol_production   onsoctcp  informix.example.net  1526

@@ -1,0 +1,33 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: default-observer
+  group_by:
+    - alertname
+    - informixserver
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - receiver: critical-observer
+      matchers:
+        - severity="critical"
+      repeat_interval: 1h
+
+# These receivers intentionally have no external integration. Alertmanager still
+# stores, groups, deduplicates, silences and exposes alerts in its UI. Add email,
+# webhook, Slack, Teams or another integration only to this local configuration.
+receivers:
+  - name: default-observer
+  - name: critical-observer
+
+# Do not notify a warning while a critical alert for the same instance is active.
+inhibit_rules:
+  - source_matchers:
+      - severity="critical"
+    target_matchers:
+      - severity="warning"
+    equal:
+      - informixserver
+

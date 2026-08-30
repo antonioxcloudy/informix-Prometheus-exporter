@@ -1,0 +1,153 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Install ODBC headers
+        run: sudo apt-get update && sudo apt-get install --yes --no-install-recommends unixodbc-dev
+
+      - name: Check formatting
+        run: test -z "$(gofmt -l cmd internal)"
+
+      - name: Test with race detector
+        run: go test -race ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Check known Go vulnerabilities
+        uses: golang/govulncheck-action@v1
+        with:
+          repo-checkout: false
+          go-version-file: go.mod
+          go-package: ./...
+
+      - name: Build exporter
+        run: go build ./cmd/informix_exporter
+
+  deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Validate Compose
+        env:
+          GRAFANA_ADMIN_PASSWORD: ci-only
+          INFORMIX_PASSWORD_SECRET_FILE: LICENSE
+        run: |
+          docker compose config --quiet
+          docker compose -f compose.yaml -f compose.secrets.yaml config --quiet
+          ALERTMANAGER_WEBHOOK_URL_FILE=LICENSE \
+            docker compose -f compose.yaml -f compose.webhook.yaml config --quiet
+
+      - name: Check shell scripts
+        run: sh -n deploy/*.sh
+
+      - name: Test installation assistants
+        shell: bash
+        run: |
+          sh -n scripts/install.sh
+
+          shell_test="$(mktemp -d)"
+          cp -R "$GITHUB_WORKSPACE/." "${shell_test}/"
+          cd "${shell_test}"
+          sh scripts/install.sh prepare --secrets --webhook
+          test -f .env
+          test -f deploy/config/config.yaml
+          test -f deploy/config/odbc.ini
+          test -f deploy/config/sqlhosts
+          test -f deploy/config/alertmanager.yml
+          test -f deploy/secrets/informix_password
+          test -d deploy/secrets/informix
+          test -f deploy/secrets/alertmanager_webhook_url
+          cd "$GITHUB_WORKSPACE"
+
+          powershell_test="$(mktemp -d)"
+          cp -R "$GITHUB_WORKSPACE/." "${powershell_test}/"
+          cd "${powershell_test}"
+          pwsh -NoProfile -File scripts/install.ps1 -Action Prepare -Secrets -Webhook
+          test -f .env
+          test -f deploy/config/config.yaml
+          test -f deploy/config/odbc.ini
+          test -f deploy/config/sqlhosts
+          test -f deploy/config/alertmanager.yml
+          test -f deploy/secrets/informix_password
+          test -d deploy/secrets/informix
+          test -f deploy/secrets/alertmanager_webhook_url
+
+      - name: Validate Prometheus configuration and rules
+        run: |
+          docker run --rm \
+            -v "$PWD/deploy/prometheus:/etc/prometheus" \
+            --entrypoint promtool \
+            prom/prometheus:v3.13.2 \
+            check config /etc/prometheus/prometheus.yml
+
+      - name: Validate Alertmanager configuration
+        run: |
+          docker run --rm \
+            -v "$PWD/examples/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro" \
+            --entrypoint amtool \
+            prom/alertmanager:v0.33.1 \
+            check-config /etc/alertmanager/alertmanager.yml
+
+          webhook_url="$(mktemp)"
+          printf '%s' 'https://example.invalid/alertmanager' > "${webhook_url}"
+          docker run --rm \
+            -v "$PWD/examples/alertmanager.webhook.yml:/etc/alertmanager/alertmanager.yml:ro" \
+            -v "${webhook_url}:/run/secrets/alertmanager_webhook_url:ro" \
+            --entrypoint amtool \
+            prom/alertmanager:v0.33.1 \
+            check-config /etc/alertmanager/alertmanager.yml
+
+      - name: Validate Grafana dashboard JSON
+        run: jq --exit-status . deploy/grafana/dashboards/informix-overview.json >/dev/null
+
+      - name: Build container image
+        run: docker build --tag informix-exporter:ci .
+
+      - name: Test version and configuration diagnostics
+        run: |
+          docker run --rm informix-exporter:ci --version
+          docker run --rm \
+            -v "$PWD/examples/config.yaml:/config.yaml:ro" \
+            informix-exporter:ci \
+            --configfile=/config.yaml --check-config
+          docker run --rm \
+            -v "$PWD/examples/config.multi-instance.yaml:/config.yaml:ro" \
+            informix-exporter:ci \
+            --configfile=/config.yaml --check-config
+
+      - name: Test ODBC password-file rendering
+        run: |
+          docker run --rm --entrypoint /bin/sh informix-exporter:ci -c '
+            mkdir -p /tmp/test-csdk/lib/cli /tmp/test-config /tmp/test-secrets
+            : > /tmp/test-csdk/lib/cli/iclit09b.so
+            : > /tmp/test-config/sqlhosts
+            printf "[first]\nPWD_FILE=/tmp/test-secrets/password\n[second]\nPWD_FILE=/tmp/test-secrets/other-password\n" > /tmp/test-config/odbc.ini
+            printf "ci-only" > /tmp/test-secrets/password
+            printf "also-ci-only" > /tmp/test-secrets/other-password
+            INFORMIXDIR=/tmp/test-csdk \
+            INFORMIXSQLHOSTS=/tmp/test-config/sqlhosts \
+            ODBCINI=/tmp/test-config/odbc.ini \
+            /usr/local/bin/docker-entrypoint --check-runtime
+          '

@@ -1,0 +1,154 @@
+name: informix-monitoring
+
+services:
+  csdk-init:
+    profiles: [setup]
+    platform: ${EXPORTER_PLATFORM:-linux/amd64}
+    build:
+      context: .
+      target: csdk-init
+    image: local/informix-csdk-init:${EXPORTER_VERSION:-dev}
+    volumes:
+      - type: bind
+        source: ${INFORMIX_CSDK_ARCHIVE:-./runtime/informix-client-runtime-linux-amd64.tar.gz}
+        target: /input/informix-client-runtime-linux-amd64.tar.gz
+        read_only: true
+      - informix_csdk:/opt/informix
+    restart: "no"
+
+  informix-exporter:
+    platform: ${EXPORTER_PLATFORM:-linux/amd64}
+    build:
+      context: .
+      args:
+        VERSION: ${EXPORTER_VERSION:-dev}
+        COMMIT: ${EXPORTER_COMMIT:-unknown}
+        BUILD_DATE: ${EXPORTER_BUILD_DATE:-unknown}
+    image: local/informix-exporter:${EXPORTER_VERSION:-dev}
+    command:
+      - --configfile=/etc/informix-exporter/config.yaml
+      - --port=8080
+      - --scrape-timeout=${EXPORTER_SCRAPE_TIMEOUT:-8s}
+      - --slow-refresh-interval=${EXPORTER_SLOW_REFRESH_INTERVAL:-2h}
+    environment:
+      INFORMIXDIR: /opt/informix
+      INFORMIXSQLHOSTS: /etc/informix-exporter/sqlhosts
+      ODBCINI: /etc/informix-exporter/odbc.ini
+      LD_LIBRARY_PATH: /opt/informix/lib:/opt/informix/lib/esql:/opt/informix/lib/cli
+    user: "${EXPORTER_UID:-65532}:${EXPORTER_GID:-65532}"
+    ports:
+      - "${MONITORING_BIND_ADDRESS:-0.0.0.0}:${EXPORTER_PORT:-8080}:8080"
+    volumes:
+      - type: bind
+        source: ./deploy/config/config.yaml
+        target: /etc/informix-exporter/config.yaml
+        read_only: true
+      - type: bind
+        source: ./deploy/config/odbc.ini
+        target: /etc/informix-exporter/odbc.ini
+        read_only: true
+      - type: bind
+        source: ./deploy/config/sqlhosts
+        target: /etc/informix-exporter/sqlhosts
+        read_only: true
+      - type: volume
+        source: informix_csdk
+        target: /opt/informix
+        read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    read_only: true
+    cap_drop:
+      - ALL
+    pids_limit: 128
+    stop_grace_period: 15s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus:v3.13.2
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-15d}
+    ports:
+      - "${MONITORING_BIND_ADDRESS:-0.0.0.0}:${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deploy/prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      informix-exporter:
+        condition: service_healthy
+      alertmanager:
+        condition: service_healthy
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    pids_limit: 256
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitoring
+
+  alertmanager:
+    image: prom/alertmanager:v0.33.1
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+      - --data.retention=${ALERTMANAGER_RETENTION:-120h}
+      - --enable-feature=utf8-strict-mode
+    ports:
+      - "${MONITORING_BIND_ADDRESS:-0.0.0.0}:${ALERTMANAGER_PORT:-9093}:9093"
+    volumes:
+      - ./deploy/config/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9093/-/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    pids_limit: 128
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:13.2.0
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "${MONITORING_BIND_ADDRESS:-0.0.0.0}:${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deploy/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    pids_limit: 256
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitoring
+
+volumes:
+  informix_csdk:
+  prometheus_data:
+  grafana_data:
+  alertmanager_data:
+
+networks:
+  monitoring:

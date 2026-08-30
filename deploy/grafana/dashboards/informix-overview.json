@@ -1,0 +1,596 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Estado, actividad, buffers, almacenamiento y contención de IBM/HCL Informix.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "panels": [],
+      "title": "Resumen operativo",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [
+            { "options": { "0": { "color": "red", "text": "CAÍDO" }, "1": { "color": "green", "text": "OK" } }, "type": "value" }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+      "id": 2,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value_and_name", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "min(informix_up{informixserver=~\"$instance\"})", "legendFormat": "Informix", "range": true, "refId": "A" }],
+      "title": "Estado Informix",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+      "id": 3,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "sum(informix_open_transactions{informixserver=~\"$instance\"})", "legendFormat": "Transacciones", "range": true, "refId": "A" }],
+      "title": "Transacciones abiertas",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
+      "id": 4,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "sum(informix_locks{informixserver=~\"$instance\",state=\"active\"})", "legendFormat": "Locks", "range": true, "refId": "A" }],
+      "title": "Locks activos",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
+      "id": 5,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "sum(informix_locks{informixserver=~\"$instance\",state=\"waiting\"})", "legendFormat": "Esperando", "range": true, "refId": "A" }],
+      "title": "Locks con espera",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 10 }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+      "id": 6,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "sum(informix_logical_logs_not_backed_up{informixserver=~\"$instance\"})", "legendFormat": "Logs", "range": true, "refId": "A" }],
+      "title": "Logs sin backup",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "decimals": 1, "max": 100, "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 80 }, { "color": "red", "value": 90 }] }, "unit": "percent" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
+      "id": 7,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "max(informix_dbspace_used_ratio{informixserver=~\"$instance\"}) * 100", "legendFormat": "Máximo", "range": true, "refId": "A" }],
+      "title": "Dbspace: máximo usado",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "id": 10,
+      "panels": [],
+      "title": "Actividad y transacciones",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "operaciones/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 12, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "unit": "ops" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "id": 11,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum by (informixserver) (rate(informix_isam_operations_total{informixserver=~\"$instance\",operation=\"commit\"}[$__rate_interval]))", "legendFormat": "{{informixserver}} commits", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum by (informixserver) (rate(informix_isam_operations_total{informixserver=~\"$instance\",operation=\"rollback\"}[$__rate_interval]))", "legendFormat": "{{informixserver}} rollbacks", "range": true, "refId": "B" }
+      ],
+      "title": "Commits y rollbacks por segundo",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "operaciones/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "unit": "ops" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "id": 12,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum(rate(informix_isam_operations_total{informixserver=~\"$instance\",operation=\"read\"}[$__rate_interval]))", "legendFormat": "Lecturas", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum(rate(informix_isam_operations_total{informixserver=~\"$instance\",operation=\"write\"}[$__rate_interval]))", "legendFormat": "Escrituras", "range": true, "refId": "B" },
+        { "editorMode": "code", "expr": "sum(rate(informix_isam_operations_total{informixserver=~\"$instance\",operation=\"update\"}[$__rate_interval]))", "legendFormat": "Actualizaciones", "range": true, "refId": "C" },
+        { "editorMode": "code", "expr": "sum(rate(informix_isam_operations_total{informixserver=~\"$instance\",operation=\"delete\"}[$__rate_interval]))", "legendFormat": "Borrados", "range": true, "refId": "D" },
+        { "editorMode": "code", "expr": "sum(rate(informix_isam_operations_total{informixserver=~\"$instance\",operation=\"open\"}[$__rate_interval]))", "legendFormat": "Aperturas", "range": true, "refId": "E" }
+      ],
+      "title": "Operaciones ISAM por segundo",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "id": 13,
+      "panels": [],
+      "title": "Sesiones, locks y logical logs",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "sesiones", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 12, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 15 },
+      "id": 14,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum(informix_sessions{informixserver=~\"$instance\"})", "legendFormat": "Sesiones", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum by (reason) (informix_session_waiting{informixserver=~\"$instance\"})", "legendFormat": "Espera {{reason}}", "range": true, "refId": "B" }
+      ],
+      "title": "Sesiones y esperas actuales",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "continuous-GrYlRd" }, "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 100 }, { "color": "red", "value": 1000 }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 15 },
+      "id": 15,
+      "options": { "displayMode": "gradient", "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false }, "maxVizHeight": 300, "minVizHeight": 16, "minVizWidth": 8, "namePlacement": "auto", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showUnfilled": true, "sizing": "auto", "valueMode": "color" },
+      "targets": [{ "editorMode": "code", "expr": "sum by (type) (informix_locks_by_type{informixserver=~\"$instance\"})", "legendFormat": "{{type}}", "range": true, "refId": "A" }],
+      "title": "Locks activos por tipo",
+      "type": "bargauge"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "decimals": 1, "max": 100, "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 70 }, { "color": "red", "value": 90 }] }, "unit": "percent" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 15 },
+      "id": 16,
+      "options": { "displayMode": "gradient", "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false }, "maxVizHeight": 300, "minVizHeight": 16, "minVizWidth": 8, "namePlacement": "auto", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showUnfilled": true, "sizing": "auto", "valueMode": "color" },
+      "targets": [{ "editorMode": "code", "expr": "informix_logical_log_used_ratio{informixserver=~\"$instance\"} * 100", "legendFormat": "Log {{log_number}}", "range": true, "refId": "A" }],
+      "title": "Uso de logical logs",
+      "type": "bargauge"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "id": 20,
+      "panels": [],
+      "title": "Buffers y páginas",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "páginas/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "unit": "pps" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+      "id": 21,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum by (page_size) (rate(informix_buffer_operations_total{informixserver=~\"$instance\",operation=\"buffer_read\"}[$__rate_interval]))", "legendFormat": "Buffer reads {{page_size}}", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum by (page_size) (rate(informix_buffer_operations_total{informixserver=~\"$instance\",operation=\"disk_read\"}[$__rate_interval]))", "legendFormat": "Disk reads {{page_size}}", "range": true, "refId": "B" }
+      ],
+      "title": "Lecturas: buffer frente a disco",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "páginas/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "unit": "pps" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 24 },
+      "id": 22,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum by (page_size) (rate(informix_buffer_operations_total{informixserver=~\"$instance\",operation=\"buffer_write\"}[$__rate_interval]))", "legendFormat": "Buffer writes {{page_size}}", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum by (page_size) (rate(informix_buffer_operations_total{informixserver=~\"$instance\",operation=\"disk_write\"}[$__rate_interval]))", "legendFormat": "Disk writes {{page_size}}", "range": true, "refId": "B" }
+      ],
+      "title": "Escrituras: buffer frente a disco",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "esperas/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 18, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "unit": "ops" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 24 },
+      "id": 23,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum(rate(informix_waits_total{informixserver=~\"$instance\",type=\"buffer\"}[$__rate_interval]))", "legendFormat": "Buffer waits", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum by (page_size) (rate(informix_buffer_operations_total{informixserver=~\"$instance\",operation=\"buffer_wait\"}[$__rate_interval]))", "legendFormat": "{{page_size}} waits", "range": true, "refId": "B" }
+      ],
+      "title": "Esperas de buffer",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 },
+      "id": 30,
+      "panels": [],
+      "title": "Almacenamiento",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "decimals": 1, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "orange", "value": 268435456 }, { "color": "green", "value": 1073741824 }] }, "unit": "bytes" }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 8, "x": 0, "y": 33 },
+      "id": 31,
+      "options": { "displayMode": "gradient", "maxVizHeight": 300, "minVizHeight": 16, "minVizWidth": 8, "namePlacement": "auto", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showUnfilled": true, "sizing": "auto", "valueMode": "color" },
+      "targets": [{ "editorMode": "code", "expr": "informix_dbspace_free_bytes{informixserver=~\"$instance\"}", "legendFormat": "{{dbspace}}", "range": true, "refId": "A" }],
+      "title": "Espacio libre por dbspace",
+      "type": "bargauge"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "operaciones/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "unit": "ops" }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 8, "x": 8, "y": 33 },
+      "id": 32,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "rate(informix_chunk_io_operations_total{informixserver=~\"$instance\",operation=\"read\"}[$__rate_interval])", "legendFormat": "{{dbspace}}/{{chunk_number}} reads", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "rate(informix_chunk_io_operations_total{informixserver=~\"$instance\",operation=\"write\"}[$__rate_interval])", "legendFormat": "{{dbspace}}/{{chunk_number}} writes", "range": true, "refId": "B" }
+      ],
+      "title": "Operaciones por chunk",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "páginas/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "unit": "pps" }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 33 },
+      "id": 33,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "rate(informix_chunk_io_pages_total{informixserver=~\"$instance\",operation=\"read\"}[$__rate_interval])", "legendFormat": "{{dbspace}}/{{chunk_number}} reads", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "rate(informix_chunk_io_pages_total{informixserver=~\"$instance\",operation=\"write\"}[$__rate_interval])", "legendFormat": "{{dbspace}}/{{chunk_number}} writes", "range": true, "refId": "B" }
+      ],
+      "title": "Páginas transferidas por chunk",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 42 },
+      "id": 40,
+      "panels": [],
+      "title": "Contención y checkpoints",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "eventos/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 12, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "unit": "ops" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 43 },
+      "id": 41,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum(rate(informix_lock_requests_total{informixserver=~\"$instance\"}[$__rate_interval]))", "legendFormat": "Lock requests", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum(rate(informix_waits_total{informixserver=~\"$instance\",type=\"lock\"}[$__rate_interval]))", "legendFormat": "Lock waits", "range": true, "refId": "B" },
+        { "editorMode": "code", "expr": "sum(rate(informix_waits_total{informixserver=~\"$instance\",type=\"latch\"}[$__rate_interval]))", "legendFormat": "Latch waits", "range": true, "refId": "C" },
+        { "editorMode": "code", "expr": "sum(rate(informix_waits_total{informixserver=~\"$instance\",type=\"checkpoint\"}[$__rate_interval]))", "legendFormat": "Checkpoint waits", "range": true, "refId": "D" }
+      ],
+      "title": "Solicitudes y esperas",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "valor", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 12, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 43 },
+      "id": 42,
+      "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "informix_checkpoint_duration_seconds{informixserver=~\"$instance\"}", "legendFormat": "Checkpoint time", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "informix_checkpoint_dirty_buffers{informixserver=~\"$instance\"}", "legendFormat": "Dirty buffers", "range": true, "refId": "B" },
+        { "editorMode": "code", "expr": "informix_checkpoint_flushes_per_second{informixserver=~\"$instance\"}", "legendFormat": "Disk flush/s", "range": true, "refId": "C" },
+        { "editorMode": "code", "expr": "rate(informix_physical_log_writes_total{informixserver=~\"$instance\"}[$__rate_interval])", "legendFormat": "Physical log writes/s", "range": true, "refId": "D" }
+      ],
+      "title": "Checkpoint y flush",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 51 },
+      "id": 50,
+      "panels": [],
+      "title": "Consultas, ordenaciones y read-ahead",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "operaciones/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "unit": "ops" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 52 },
+      "id": 51,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum(rate(informix_sequential_scans_total{informixserver=~\"$instance\"}[$__rate_interval]))", "legendFormat": "Sequential scans", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum(rate(informix_read_ahead_pages_total{informixserver=~\"$instance\",type=\"index\"}[$__rate_interval]))", "legendFormat": "Read-ahead index", "range": true, "refId": "B" },
+        { "editorMode": "code", "expr": "sum(rate(informix_read_ahead_pages_total{informixserver=~\"$instance\",type=\"data\"}[$__rate_interval]))", "legendFormat": "Read-ahead data", "range": true, "refId": "C" },
+        { "editorMode": "code", "expr": "sum(rate(informix_read_ahead_pages_total{informixserver=~\"$instance\",type=\"direct\"}[$__rate_interval]))", "legendFormat": "Direct page read-ahead", "range": true, "refId": "D" }
+      ],
+      "title": "Scans y read-ahead",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "sorts/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 10, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "unit": "ops" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 52 },
+      "id": 52,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum(rate(informix_sorts_total{informixserver=~\"$instance\",location=\"total\"}[$__rate_interval]))", "legendFormat": "Total", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum(rate(informix_sorts_total{informixserver=~\"$instance\",location=\"memory\"}[$__rate_interval]))", "legendFormat": "En memoria", "range": true, "refId": "B" },
+        { "editorMode": "code", "expr": "sum(rate(informix_sorts_total{informixserver=~\"$instance\",location=\"disk\"}[$__rate_interval]))", "legendFormat": "En disco", "range": true, "refId": "C" }
+      ],
+      "title": "Ordenaciones por segundo",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 60 },
+      "id": 60,
+      "panels": [],
+      "title": "Límites de tablas",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Suma de extents de todas las particiones de cada tabla. Solo aparecen tablas que superan el filtro configurado.",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 100 }, { "color": "orange", "value": 180 }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 8, "x": 0, "y": 61 },
+      "id": 61,
+      "options": { "displayMode": "gradient", "maxVizHeight": 300, "minVizHeight": 16, "minVizWidth": 8, "namePlacement": "auto", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showUnfilled": true, "sizing": "auto", "valueMode": "color" },
+      "targets": [{ "editorMode": "code", "expr": "topk(20, informix_table_extents{informixserver=~\"$instance\"})", "legendFormat": "{{database}}:{{owner}}.{{table}}", "range": true, "refId": "A" }],
+      "title": "Top tablas por extents",
+      "type": "bargauge"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Espacio utilizado agregado para las tablas incluidas por el collector de límites.",
+      "fieldConfig": { "defaults": { "color": { "mode": "continuous-BlPu" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }, "unit": "bytes" }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 8, "x": 8, "y": 61 },
+      "id": 62,
+      "options": { "displayMode": "gradient", "maxVizHeight": 300, "minVizHeight": 16, "minVizWidth": 8, "namePlacement": "auto", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showUnfilled": true, "sizing": "auto", "valueMode": "color" },
+      "targets": [{ "editorMode": "code", "expr": "topk(20, informix_table_used_bytes{informixserver=~\"$instance\"})", "legendFormat": "{{database}}:{{owner}}.{{table}}", "range": true, "refId": "A" }],
+      "title": "Top tablas monitorizadas por tamaño",
+      "type": "bargauge"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Porcentaje del límite clásico ROWID configurado. No debe interpretarse como límite para tablas LARGE.",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "max": 1, "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.7 }, { "color": "orange", "value": 0.85 }, { "color": "red", "value": 0.95 }] }, "unit": "percentunit" }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 61 },
+      "id": 63,
+      "options": { "displayMode": "gradient", "maxVizHeight": 300, "minVizHeight": 16, "minVizWidth": 8, "namePlacement": "auto", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showUnfilled": true, "sizing": "auto", "valueMode": "color" },
+      "targets": [{ "editorMode": "code", "expr": "topk(20, informix_partition_classic_page_limit_ratio{informixserver=~\"$instance\"})", "legendFormat": "{{database}}:{{owner}}.{{table}}/{{partition}}", "range": true, "refId": "A" }],
+      "title": "Particiones próximas al límite clásico",
+      "type": "bargauge"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 70 },
+      "id": 70,
+      "panels": [],
+      "title": "Salud del exporter",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [{ "options": { "0": { "color": "red", "text": "ERROR" }, "1": { "color": "green", "text": "OK" } }, "type": "value" }], "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] } }, "overrides": [] },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 71 },
+      "id": 71,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "min(informix_exporter_instance_scrape_success{informixserver=~\"$instance\"})", "legendFormat": "Último scrape", "range": true, "refId": "A" }],
+      "title": "Resultado del scrape",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 5 }, { "color": "red", "value": 8 }] }, "unit": "s" }, "overrides": [] },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 71 },
+      "id": 72,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "max(informix_exporter_instance_scrape_duration_seconds{informixserver=~\"$instance\"})", "legendFormat": "Duración", "range": true, "refId": "A" }],
+      "title": "Duración del scrape",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 71 },
+      "id": 73,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "sum(increase(informix_exporter_scrape_errors_total{informixserver=~\"$instance\"}[$__range]))", "legendFormat": "Errores", "range": true, "refId": "A" }],
+      "title": "Errores en el intervalo",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "blue" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] } }, "overrides": [] },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 71 },
+      "id": 74,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "name", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "informix_exporter_build_info", "legendFormat": "v{{version}} · {{commit}}", "range": true, "refId": "A" }],
+      "title": "Versión desplegada",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 76 },
+      "id": 75,
+      "panels": [],
+      "title": "Diagnóstico de colectores",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [{ "options": { "0": { "color": "red", "text": "ERROR" }, "1": { "color": "green", "text": "OK" } }, "type": "value" }],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 77 },
+      "id": 76,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value_and_name", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "informix_exporter_collector_success{informixserver=~\"$instance\"}", "legendFormat": "{{informixserver}} · {{collector}}", "range": true, "refId": "A" }],
+      "title": "Estado por colector",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "segundos", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 12, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "unit": "s" }, "overrides": [] },
+      "gridPos": { "h": 7, "w": 16, "x": 8, "y": 77 },
+      "id": 77,
+      "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "right", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "editorMode": "code", "expr": "informix_exporter_collector_duration_seconds{informixserver=~\"$instance\"}", "legendFormat": "{{informixserver}} · {{collector}}", "range": true, "refId": "A" }],
+      "title": "Duración por colector",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 84 },
+      "id": 78,
+      "panels": [],
+      "title": "Alertas y notificaciones",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [{ "options": { "0": { "color": "red", "text": "CAÍDO" }, "1": { "color": "green", "text": "OK" } }, "type": "value" }], "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] } }, "overrides": [] },
+      "gridPos": { "h": 5, "w": 8, "x": 0, "y": 85 },
+      "id": 79,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value_and_name", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "min(up{job=\"alertmanager\"})", "legendFormat": "Alertmanager", "range": true, "refId": "A" }],
+      "title": "Estado de Alertmanager",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 5, "w": 8, "x": 8, "y": 85 },
+      "id": 80,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value_and_name", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "sum(ALERTS{alertstate=\"firing\"}) or vector(0)", "legendFormat": "Disparadas", "range": true, "refId": "A" }],
+      "title": "Alertas activas",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 1 }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 5, "w": 8, "x": 16, "y": 85 },
+      "id": 81,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value_and_name", "wideLayout": true },
+      "targets": [{ "editorMode": "code", "expr": "sum(ALERTS{alertstate=\"pending\"}) or vector(0)", "legendFormat": "Pendientes", "range": true, "refId": "A" }],
+      "title": "Alertas pendientes",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 90 },
+      "id": 90,
+      "panels": [],
+      "title": "Indicadores de rendimiento",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Rotaciones medias del buffer pool por hora desde el último reinicio de las estadísticas. No es un porcentaje.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "rotaciones/hora", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 12, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "min": 0, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 91 },
+      "id": 91,
+      "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "editorMode": "code", "expr": "informix_buffer_turnover_ratio{informixserver=~\"$instance\"}", "legendFormat": "{{informixserver}} · {{page_size}}", "range": true, "refId": "A" }],
+      "title": "BTR por buffer pool",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Porcentaje de lecturas resueltas desde buffer frente al total de lecturas lógicas. Un valor alto suele indicar buen aprovechamiento de la caché.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "porcentaje", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 12, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "max": 100, "min": 0, "unit": "percent" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 91 },
+      "id": 92,
+      "options": { "legend": { "calcs": ["lastNotNull", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "editorMode": "code", "expr": "100 * (1 - (sum by (informixserver, page_size) (rate(informix_buffer_operations_total{informixserver=~\"$instance\",operation=\"disk_read\"}[$__rate_interval])) / clamp_min(sum by (informixserver, page_size) (rate(informix_buffer_operations_total{informixserver=~\"$instance\",operation=\"buffer_read\"}[$__rate_interval])), 0.000001)))", "legendFormat": "{{informixserver}} · {{page_size}}", "range": true, "refId": "A" }],
+      "title": "Buffer hit ratio",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Ritmo de esperas para obtener un buffer, separado por instancia y tamaño de página.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "esperas/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 12, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "min": 0, "unit": "ops" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 91 },
+      "id": 93,
+      "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "editorMode": "code", "expr": "sum by (informixserver, page_size) (rate(informix_buffer_operations_total{informixserver=~\"$instance\",operation=\"buffer_wait\"}[$__rate_interval]))", "legendFormat": "{{informixserver}} · {{page_size}}", "range": true, "refId": "A" }],
+      "title": "Esperas de buffer por segundo",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Páginas leídas y escritas físicamente en los chunks por segundo.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "páginas/s", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 12, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 4, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" } }, "min": 0, "unit": "pps" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 91 },
+      "id": 94,
+      "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum by (informixserver) (rate(informix_chunk_io_pages_total{informixserver=~\"$instance\",operation=\"read\"}[$__rate_interval]))", "legendFormat": "{{informixserver}} · lecturas", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum by (informixserver) (rate(informix_chunk_io_pages_total{informixserver=~\"$instance\",operation=\"write\"}[$__rate_interval]))", "legendFormat": "{{informixserver}} · escrituras", "range": true, "refId": "B" }
+      ],
+      "title": "I/O físico por segundo",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 41,
+  "tags": ["informix", "prometheus", "database"],
+  "templating": {
+    "list": [
+      {
+        "current": { "selected": true, "text": "Prometheus", "value": "Prometheus" },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "DS_PROMETHEUS",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "allValue": ".*",
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "definition": "label_values(informix_up, informixserver)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Instancia",
+        "multi": true,
+        "name": "instance",
+        "options": [],
+        "query": { "query": "label_values(informix_up, informixserver)", "refId": "PrometheusVariableQueryEditor-VariableQuery" },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Informix - Vista general",
+  "uid": "informix-overview",
+  "version": 1,
+  "weekStart": "monday"
+}

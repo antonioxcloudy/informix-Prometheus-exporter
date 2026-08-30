@@ -1,0 +1,128 @@
+groups:
+  - name: informix
+    rules:
+      - alert: AlertmanagerDown
+        expr: up{job="alertmanager"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Alertmanager is unavailable"
+          description: "Prometheus cannot reach Alertmanager, so external notifications may not be delivered."
+
+      - alert: InformixExporterDown
+        expr: up{job="informix"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Informix exporter is unavailable"
+          description: "Prometheus cannot scrape the fast Informix endpoint."
+
+      - alert: InformixDown
+        expr: informix_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Informix {{ $labels.informixserver }} is unavailable"
+          description: "The exporter cannot ping the Informix instance through ODBC."
+
+      - alert: InformixExporterScrapeFailing
+        expr: informix_exporter_instance_scrape_success == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Informix {{ $labels.informixserver }} scrapes are failing"
+          description: "Connectivity or at least one collector has failed for this instance for more than two minutes."
+
+      - alert: InformixCollectorFailing
+        expr: informix_exporter_collector_success == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Informix collector {{ $labels.collector }} is failing on {{ $labels.informixserver }}"
+          description: "The {{ $labels.collector }} collector has failed for this instance for more than two minutes."
+
+      - alert: InformixExporterScrapeSlow
+        expr: informix_exporter_instance_scrape_duration_seconds > 8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Informix {{ $labels.informixserver }} scrape is close to its timeout"
+          description: "The last scrape for this instance took {{ $value | humanizeDuration }}."
+
+      - alert: InformixDbspaceUsageHigh
+        expr: informix_dbspace_used_ratio > 0.90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Dbspace {{ $labels.dbspace }} is over 90% used"
+          description: "Usage is {{ $value | humanizePercentage }} on {{ $labels.informixserver }}."
+
+      - alert: InformixDbspaceUsageCritical
+        expr: informix_dbspace_used_ratio > 0.97
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Dbspace {{ $labels.dbspace }} is over 97% used"
+          description: "Usage is {{ $value | humanizePercentage }} on {{ $labels.informixserver }}."
+
+      - alert: InformixChunkOffline
+        expr: informix_chunk_online == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Chunk {{ $labels.chunk_number }} is offline or inconsistent"
+          description: "{{ $labels.chunk }} in dbspace {{ $labels.dbspace }} is unavailable."
+
+      - alert: InformixLockWaiters
+        expr: informix_locks{state="waiting"} > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Informix {{ $labels.informixserver }} has sessions waiting for locks"
+          description: "There are {{ $value }} active locks with at least one waiting session."
+
+      - alert: InformixLongTransactions
+        expr: informix_long_transactions > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Informix {{ $labels.informixserver }} has long transactions"
+          description: "Informix has marked {{ $value }} transactions as long-running."
+
+      - alert: InformixLogicalLogBackupBacklog
+        expr: informix_logical_logs_not_backed_up / informix_logical_log_files > 0.75
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Informix {{ $labels.informixserver }} logical-log backup backlog is high"
+          description: "More than 75% of configured logical logs are used and not backed up."
+
+      - alert: InformixClassicPartitionPageLimitHigh
+        expr: informix_partition_classic_page_limit_ratio > 0.85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Partition {{ $labels.partition }} is approaching the classic page limit"
+          description: "{{ $labels.database }}:{{ $labels.owner }}.{{ $labels.table }} is at {{ $value | humanizePercentage }}. Verify whether the table is LARGE."
+
+      - alert: InformixClassicPartitionPageLimitCritical
+        expr: informix_partition_classic_page_limit_ratio > 0.95
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Partition {{ $labels.partition }} is near the classic page limit"
+          description: "{{ $labels.database }}:{{ $labels.owner }}.{{ $labels.table }} is at {{ $value | humanizePercentage }}. Verify whether the table is LARGE."

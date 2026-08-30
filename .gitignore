@@ -1,0 +1,62 @@
+# Local Informix configuration and credentials
+config.yaml
+config.monitoring
+odbc.ini
+sqlhosts
+deploy/config/config.yaml
+deploy/config/odbc.ini
+deploy/config/alertmanager.yml
+deploy/secrets/*
+!deploy/secrets/.gitkeep
+
+# Keep sanitized examples under version control
+!config.example.yaml
+!config.monitoring.example
+!odbc.example.ini
+!sqlhosts.example
+!examples/
+!examples/**
+
+# Locally installed proprietary Client SDK
+runtime/
+vendor/
+
+# Compiled exporter binaries
+informixcollector
+informixtables
+*.exe
+*.test
+*.out
+
+# Go build and test artifacts
+bin/
+build/
+dist/
+coverage.out
+coverage.html
+
+# Informix Client SDK installers (proprietary and large)
+CSDK*.tar
+CSDK*.tar.gz
+CSDK*.tgz
+informix-client-runtime-*.tar.gz
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Editors and operating systems
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Temporary and log files
+backups/
+*.log
+*.tmp
+*.bak
+*~

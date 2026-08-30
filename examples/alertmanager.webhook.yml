@@ -1,0 +1,33 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: generic-webhook
+  group_by:
+    - alertname
+    - informixserver
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - receiver: generic-webhook
+      matchers:
+        - severity="critical"
+      repeat_interval: 1h
+
+receivers:
+  - name: generic-webhook
+    webhook_configs:
+      - url_file: /run/secrets/alertmanager_webhook_url
+        send_resolved: true
+        max_alerts: 20
+        timeout: 10s
+
+inhibit_rules:
+  - source_matchers:
+      - severity="critical"
+    target_matchers:
+      - severity="warning"
+    equal:
+      - informixserver
+

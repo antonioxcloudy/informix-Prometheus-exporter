@@ -1,0 +1,12 @@
+apiVersion: 1
+
+providers:
+  - name: Informix
+    orgId: 1
+    folder: Informix
+    type: file
+    disableDeletion: false
+    allowUiUpdates: true
+    updateIntervalSeconds: 10
+    options:
+      path: /var/lib/grafana/dashboards

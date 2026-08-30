@@ -1,0 +1,31 @@
+---
+servers:
+  # Inherits the global collector list below.
+  - name: informix-production
+    informixserver: informix-production
+
+  # A per-server list overrides the global list. This is useful for a slower
+  # reporting instance or when a user has fewer permissions there.
+  - name: informix-reporting
+    informixserver: informix-reporting
+    collectors:
+      - activity
+      - dbspaces
+
+# Tables remain disabled in this example while that collector is parked.
+collectors:
+  - profile
+  - activity
+  - dbspaces
+  - custom
+
+slow_collectors:
+  - dbspaces
+  - tables
+
+custom: []
+
+table_limits:
+  minimum_extents: 100
+  minimum_partition_pages: 8000000
+  classic_partition_page_limit: 16777215

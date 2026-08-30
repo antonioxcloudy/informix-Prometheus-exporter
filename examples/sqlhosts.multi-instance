@@ -1,0 +1,2 @@
+ol_production onsoctcp informix-production.example.net 1526
+ol_reporting onsoctcp informix-reporting.example.net 1526
